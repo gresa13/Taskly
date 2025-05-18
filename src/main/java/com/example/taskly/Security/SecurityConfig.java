@@ -42,12 +42,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.ignoringRequestMatchers("/register"))  // Explicitly disabling CSRF
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/tasks/**","/api/public/**", "/login", "/register").permitAll()  // Public endpoints
-                        .anyRequest().authenticated()  // Secure other endpoints
-                )
-                .authenticationProvider(authenticationProvider());
+                        .requestMatchers("/tasks/", "/login", "/register").permitAll()
+                        .anyRequest().permitAll());
 
         return http.build();
     }
