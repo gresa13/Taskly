@@ -33,11 +33,11 @@ public class OpenAiTaskCategorizer {
                 Title: %s
                 Description: %s
                 Due Date: %s
-
+                
                 Choose the most appropriate category from:    WORK,SHOPPING,GROCERIES,SCHOOL,FITNESS,STUDY,OTHER,
                 FAMILY,REMINDER,HOMEWORK,GOALS.
                 Choose the most appropriate priority from: LOW, MEDIUM, HIGH, URGENT.
-
+                
                 Respond in this exact format:
                 Category: <CATEGORY>
                 Priority: <PRIORITY>
@@ -49,7 +49,7 @@ public class OpenAiTaskCategorizer {
         );
 
         Map<String, Object> body = Map.of(
-                "model", "gpt-3.5-turbo",
+                "model", "gpt-4.1",
                 "messages", List.of(message),
                 "temperature", 0.2
         );
@@ -99,4 +99,46 @@ public class OpenAiTaskCategorizer {
             return TaskPriority.MEDIUM;
         }
     }
+
+    public String rewriter(String description) {
+        if (description == null || description.trim().split("\\s+").length < 20) {
+            return description;
+        }
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        String prompt = String.format("""
+                    Please rewrite the following task description to make it clearer and more concise, 
+                    grammarly correct
+                    while preserving the original meaning:
+                
+                    "%s"
+                """, description);
+
+        Map<String, Object> message = Map.of(
+                "role", "user",
+                "content", prompt
+        );
+
+        Map<String, Object> body = Map.of(
+                "model", "gpt-4.1",
+                "messages", List.of(message),
+                "temperature", 0.5
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+        ResponseEntity<Map> response = restTemplate.postForEntity("https://api.openai.com/v1/chat/completions", request, Map.class);
+
+        return Optional.ofNullable(response.getBody())
+                .map(bodyMap -> (List<Map<String, Object>>) bodyMap.get("choices"))
+                .flatMap(choices -> choices.stream().findFirst())
+                .map(choice -> (Map<String, Object>) choice.get("message"))
+                .map(messageMap -> (String) messageMap.get("content"))
+                .orElse(description);
+    }
+
 }

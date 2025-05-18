@@ -40,10 +40,16 @@ public class TaskService {
         TaskCategory category = aiCategorizer.parseCategory(aiResult.get("category"));
         TaskPriority priority = aiCategorizer.parsePriority(aiResult.get("priority"));
 
+        String finalDescription = dto.getDescription();
+        if (finalDescription.trim().split("\\s+").length > 20) {
+            finalDescription = aiCategorizer.rewriter(finalDescription);
+        }
+
         Task task = new Task();
         task.setTitle(dto.getTitle());
         task.setDescription(dto.getDescription());
         task.setDueDate(dto.getDueDate());
+        task.setDescription(finalDescription);
         task.setCategory(category);
         task.setPriority(priority);
         task.setCompleted(dto.isCompleted());
