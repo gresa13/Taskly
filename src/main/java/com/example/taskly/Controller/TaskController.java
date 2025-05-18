@@ -97,9 +97,4 @@ public class TaskController {
     public Map<String, Long> getTaskStats(@RequestParam Long userId) {
         return taskService.getTaskStats(userId);
     }
-
-
-
-
-
 }
