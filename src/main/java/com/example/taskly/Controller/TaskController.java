@@ -38,7 +38,7 @@ public class TaskController {
         taskService.deleteTask(id);
     }
 
-    @GetMapping("/tasks/search")
+    @GetMapping("/search")
     public List<Task> searchTasks(
             @RequestParam String query,
             @RequestParam(required = false) Long userId) {
